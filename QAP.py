@@ -6,12 +6,13 @@ import numpy as np
 
 class QAP(object):
 
-    def __init__(self, file=None, pop_size=100, gen=100, p_x=0.7, p_m=0.1, tour=5):
+    def __init__(self, file=None, pop_size=100, gen=100, p_x=0.7, p_m=0.1, tour=5, use_tour=False):
         self.pop_size = pop_size
         self.gen = gen
         self.p_x = p_x
         self.p_m = p_m
         self.tour = tour
+        self.use_tour = use_tour
         self.counter = 0
         self.best_fit = math.inf
         self.n = None if file is not None else 5
@@ -31,7 +32,7 @@ class QAP(object):
         pass
 
     def initialize(self):
-        start_pop = np.array([np.array([1, 2, 3, 4, 5]) for i in range(100)])
+        start_pop = np.array([np.array([1, 2, 3, 4, 5]) for i in range(self.pop_size)])
         for i in start_pop:
             np.random.shuffle(i)
         self.cur_pop = start_pop
@@ -51,21 +52,29 @@ class QAP(object):
     def roulette_prob(self, cur_fitness):
         return (self.min_fitness - cur_fitness) / self.evaluation_difference_sum
 
-    def selection(self, tour=False):
+    def selection(self):
         self.selected_pop = np.empty((0, self.n), int)
-        self.pop_probabilities = np.array([])
-        self.sum_of_probabilities = 0.0
-        for j in self.evaluated_pop:
-            probability = self.sum_of_probabilities + self.roulette_prob(j)
-            self.pop_probabilities = np.append(self.pop_probabilities, probability)
-            self.sum_of_probabilities += self.roulette_prob(j)
-        # print(self.pop_probabilities)
-        if tour:
+        if self.use_tour:
             # UZUPELNIC SELEKCJĘ TURNIEJOWĄ
-            return
+            tour_members = np.empty((0, self.n), int)
+            while len(tour_members) < self.tour:
+                chromosome = self.cur_pop[random.randint(0, self.pop_size-1)]
+                if chromosome not in tour_members:
+                    tour_members = np.append(tour_members, np.array([chromosome]), axis=0)
+            evaluated_tour_members = np.array([self.evaluate(i) for i in tour_members])
+            print(tour_members)
+            print(evaluated_tour_members)
+            #TO NIE DZIALA
+            print(np.argmin(evaluated_tour_members))
         else:
             # print(self.evaluated_pop)
             # print(self.pop_probabilities)
+            self.pop_probabilities = np.array([])
+            self.sum_of_probabilities = 0.0
+            for j in self.evaluated_pop:
+                probability = self.sum_of_probabilities + self.roulette_prob(j)
+                self.pop_probabilities = np.append(self.pop_probabilities, probability)
+                self.sum_of_probabilities += self.roulette_prob(j)
             for i, obj in enumerate(self.pop_probabilities):
                 if obj >= random.random():
                     # print(i)
@@ -119,7 +128,7 @@ class QAP(object):
         return child_a, child_b
 
     def crossover(self):
-        self.new_pop = np.array([[]])
+        self.new_pop = np.array([])
         parent_1 = None
         for i in self.selected_pop:
             if np.random.random() <= self.p_x:
@@ -130,19 +139,24 @@ class QAP(object):
                     parent_1 = None
                 else:
                     parent_1 = i
-        self.new_pop = np.reshape(self.new_pop, [self.n, self.pop_size])
-        print("Ilość osobników: " + str(len(self.new_pop)))
+        self.new_pop = np.reshape(self.new_pop, [int(len(self.new_pop) / self.n), self.n])
+        # print("Ilość osobników: " + str(len(self.new_pop)))
+        # print("Wymiary: " + str(self.new_pop.shape))
+        # print(self.cur_pop)
         # uzupełnienie brakujących osobników w populacji
         while len(self.new_pop) < self.pop_size:
-            self.new_pop = np.append(self.new_pop, np.array([self.cur_pop[np.random.randint(0, 101)]]), axis=0)
+            self.new_pop = np.append(self.new_pop, np.array([self.cur_pop[np.random.randint(0, self.pop_size)]]),
+                                     axis=0)
+
         # uznanie nowej generacji jako obecnej
+        self.new_pop = self.new_pop.astype(int)
         self.cur_pop = np.copy(self.new_pop)
-        print(self.cur_pop)
         self.new_pop = None
 
     def mutation(self):
         for chromosome in self.cur_pop:
             for i, gene in enumerate(chromosome):
                 if np.random.rand() <= self.p_m:
-                    chromosome[[i, np.random.randint(0, len(chromosome))]] = chromosome[[np.random.randint(0, len(chromosome)), i]]
+                    chromosome[[i, np.random.randint(0, len(chromosome))]] = chromosome[
+                        [np.random.randint(0, len(chromosome)), i]]
         print(self.cur_pop)
