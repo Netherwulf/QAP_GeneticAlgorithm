@@ -147,9 +147,9 @@ import numpy as np
 # fig2 = plt.figure(figsize=(11, 8))
 # ax2 = fig2.add_subplot(111)
 #
-# ax2.plot(builds, y_stack[0,:], label='Najgorszy', color='c', marker='o')
-# ax2.plot(builds, y_stack[1,:], label='Średni', color='g', marker='o')
-# ax2.plot(builds, y_stack[2,:], label='Najlepszy', color='r', marker='o')
+# ax2.plot(builds, y_stack[0, :], label='Najgorszy', color='c', marker='o')
+# ax2.plot(builds, y_stack[1, :], label='Średni', color='g', marker='o')
+# ax2.plot(builds, y_stack[2, :], label='Najlepszy', color='r', marker='o')
 #
 # plt.xticks(builds)
 # plt.xlabel('Pokolenia')
@@ -162,7 +162,7 @@ import numpy as np
 #
 # plt.show()
 # --------------------------------------------------------------------------------------
-# -------------------- BADANIE WPLYWU PRAWDPODOBIENSTWA MUTACJI -----------------------
+# -------------------- PORWNANIE DZIALANIA Z METODA NIEEWOLUCYJNA -----------------------
 # random_search = RandomSearch.RandomSearch(file="Had20.txt")
 # avg_random_search = random_search.run()
 #
