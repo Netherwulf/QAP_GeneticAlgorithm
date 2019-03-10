@@ -59,7 +59,7 @@ class QAP(object):
         self.cur_pop = start_pop
 
     def evaluate(self, chromosome):
-        return sum(sum(self.distance_matrix[i] * self.cost_matrix[chromosome[i] - 1] for i in range(self.n)))+70
+        return sum(np.sum(self.cost_matrix * self.distance_matrix[chromosome[:, None] - 1, chromosome - 1], 1))
 
     def evaluation(self):
         self.evaluated_pop = np.array([self.evaluate(i) for i in self.cur_pop])
